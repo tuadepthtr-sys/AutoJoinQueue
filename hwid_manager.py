@@ -160,7 +160,8 @@ class HWIDManager:
         if not key_str:
             return {"success": False, "message": "Vui lòng nhập mã Key!"}
 
-        keys_url = config_mgr.config.get("hwid_settings", {}).get("whitelist_url", "")
+        hwid_settings = config_mgr.config.get("hwid_settings", {})
+        keys_url = hwid_settings.get("keys_url", "").strip() or hwid_settings.get("whitelist_url", "").strip()
 
         # Try remote activation if URL is configured
         if keys_url and keys_url.startswith("http"):
@@ -227,6 +228,7 @@ class HWIDManager:
             }
 
         whitelist_url = hwid_settings.get("whitelist_url", "").strip()
+        keys_url = hwid_settings.get("keys_url", "").strip() or whitelist_url
         local_whitelist = hwid_settings.get("allowed_hwids", [])
 
         # 1. Check direct HWID whitelist
@@ -240,7 +242,7 @@ class HWIDManager:
         # 2. Check saved license_key in config
         active_key = config.get("license_key", "").strip().upper()
         if active_key:
-            keys_data = cls.load_keys_data(whitelist_url)
+            keys_data = cls.load_keys_data(keys_url)
             valid_keys = keys_data.get("valid_keys", {})
             if active_key in valid_keys:
                 bound_hwid = valid_keys[active_key].get("hwid", "").strip()
