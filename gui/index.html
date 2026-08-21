@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Queue Joiner - MCTIERS & PVPTIERS</title>
+    <link rel="icon" type="image/x-icon" href="app_icon.ico">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Constellation Canvas Background -->
+    <canvas id="constellationCanvas"></canvas>
+
+    <!-- Ambient Neon Background Glows -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+    <div class="ambient-glow glow-3"></div>
+
+    <!-- Main Container -->
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-brand">
+                <div class="logo-icon">
+                    <img src="app_icon.ico" alt="Icon" class="header-logo-img">
+                </div>
+                <div class="logo-text">
+                    <h1>QUEUE<span>JOINER</span></h1>
+                    <p class="subtitle">MCTIERS & PVPTIERS AUTOMATOR</p>
+                </div>
+            </div>
+
+            <!-- Avatar & Ring Status Widget -->
+            <div class="header-status">
+                <div class="user-status-widget" id="userStatusWidget">
+                    <div class="avatar-ring-container idle" id="avatarRingContainer">
+                        <svg class="ring-spinner" viewBox="0 0 50 50">
+                            <circle class="ring-track" cx="25" cy="25" r="21" fill="none" stroke-width="3"></circle>
+                            <circle class="ring-fill" cx="25" cy="25" r="21" fill="none" stroke-width="3" stroke-dasharray="75" stroke-dashoffset="25"></circle>
+                        </svg>
+                        <img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar" class="user-avatar-img" id="userAvatarImg">
+                    </div>
+                    <div class="user-status-text">
+                        <div class="status-title-line" id="statusTitleLine">
+                            <span class="status-action" id="statusAction">WATCHING</span>
+                            <span class="status-target" id="statusTarget">MCTIERS</span>
+                        </div>
+                        <div class="status-login-line" id="statusLoginLine">
+                            <span id="statusUsernameText">Chưa xác thực Token</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="nav-btn active" data-tab="mctiers">
+                <i class="fa-solid fa-cubes"></i> MCTIERS
+                <span class="tab-badge idle" id="mctiersBadge">IDLE</span>
+            </button>
+            <button class="nav-btn" data-tab="pvptiers">
+                <i class="fa-solid fa-shield-halved"></i> PVPTIERS
+                <span class="tab-badge idle" id="pvptiersBadge">IDLE</span>
+            </button>
+            <button class="nav-btn" data-tab="custom">
+                <i class="fa-solid fa-server"></i> CUSTOM SERVERS
+                <span class="tab-badge idle" id="customBadge">IDLE</span>
+            </button>
+            <button class="nav-btn" data-tab="settings">
+                <i class="fa-solid fa-sliders"></i> SETTINGS
+            </button>
+            <button class="nav-btn" data-tab="logs">
+                <i class="fa-solid fa-terminal"></i> LIVE LOGS
+                <span class="log-count" id="logCount">0</span>
+            </button>
+        </nav>
+
+        <!-- Main Content Viewport -->
+        <main class="content-area">
+            <!-- TAB: MCTIERS -->
+            <section class="tab-pane active" id="pane-mctiers">
+                <!-- Mode Selector Banner -->
+                <div class="glass-card mode-selector-card">
+                    <div class="mode-header">
+                        <div class="mode-icon"><i class="fa-solid fa-bolt" id="modeHeaderIcon"></i></div>
+                        <div class="mode-details">
+                            <h2 id="modeTitle">TURBO clicks</h2>
+                            <p id="modeDesc">The second a tester flips online, Queue Sniper fires Join before you could reach your mouse. TURBO is the default because speed is the whole point.</p>
+                        </div>
+                    </div>
+                    <div class="mode-pills">
+                        <button class="mode-pill active" data-mode="turbo">TURBO</button>
+                        <button class="mode-pill" data-mode="smart">Smart</button>
+                        <button class="mode-pill" data-mode="patience">Patience</button>
+                        <button class="mode-pill" data-mode="safe">Safe</button>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fa-solid fa-cubes card-icon text-cyan"></i>
+                            <div>
+                                <h2>Cấu Hình MCTIERS Queue (Đa Kênh)</h2>
+                                <p>Bấm Start MCTiers để trực TẤT CẢ 8 KÊNH MCTiers cùng lúc!</p>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-emerald" id="btnStartMctiers">
+                                <i class="fa-solid fa-play"></i> Start Tất Cả MCTiers
+                            </button>
+                            <button class="btn btn-rose" id="btnStopMctiers" disabled>
+                                <i class="fa-solid fa-stop"></i> Stop
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="channels-grid" id="mctiersChannelsGrid">
+                        <!-- Dynamic Channel Cards Rendered by JS -->
+                    </div>
+
+                    <div class="form-group" style="margin-top: 14px;">
+                        <label><i class="fa-solid fa-tags"></i> Tên Nút Bấm Join (Phân cách dấu phẩy)</label>
+                        <input type="text" id="mctiers_join_labels" placeholder="Join Queue, Join, Queue" value="Join Queue, Join, Queue">
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: PVPTIERS -->
+            <section class="tab-pane" id="pane-pvptiers">
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fa-solid fa-shield-halved card-icon text-purple"></i>
+                            <div>
+                                <h2>Cấu Hình PVPTIERS Queue (Đa Kênh)</h2>
+                                <p>Bấm Start PVPTiers để trực TẤT CẢ 8 KÊNH PVPTiers cùng lúc!</p>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-emerald" id="btnStartPvptiers">
+                                <i class="fa-solid fa-play"></i> Start Tất Cả PVPTiers
+                            </button>
+                            <button class="btn btn-rose" id="btnStopPvptiers" disabled>
+                                <i class="fa-solid fa-stop"></i> Stop
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="channels-grid" id="pvptiersChannelsGrid">
+                        <!-- Dynamic Channel Cards Rendered by JS -->
+                    </div>
+
+                    <div class="form-group" style="margin-top: 14px;">
+                        <label><i class="fa-solid fa-tags"></i> Tên Nút Bấm Join (Phân cách dấu phẩy)</label>
+                        <input type="text" id="pvptiers_join_labels" placeholder="Join Queue, Join, Queue" value="Join Queue, Join, Queue">
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: CUSTOM SERVERS -->
+            <section class="tab-pane" id="pane-custom">
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fa-solid fa-server card-icon text-indigo"></i>
+                            <div>
+                                <h2>Cấu Hình CUSTOM SERVERS (Riêng Bột)</h2>
+                                <p>Thêm và trực các Server Custom riêng biệt, hoàn toàn không dính tới MCTiers/PVPTiers!</p>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-purple btn-sm" id="btnAddCustomServer">
+                                <i class="fa-solid fa-plus"></i> Add Custom Server
+                            </button>
+                            <button class="btn btn-emerald" id="btnStartCustom">
+                                <i class="fa-solid fa-play"></i> Start Custom Servers
+                            </button>
+                            <button class="btn btn-rose" id="btnStopCustom" disabled>
+                                <i class="fa-solid fa-stop"></i> Stop
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="channels-grid" id="customChannelsGrid">
+                        <!-- Dynamic Custom Cards Rendered by JS -->
+                    </div>
+
+                    <div class="form-group" style="margin-top: 14px;">
+                        <label><i class="fa-solid fa-tags"></i> Tên Nút Bấm Join (Phân cách dấu phẩy)</label>
+                        <input type="text" id="custom_join_labels" placeholder="Join Queue, Join, Queue" value="Join Queue, Join, Queue">
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: SETTINGS -->
+            <section class="tab-pane" id="pane-settings">
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fa-solid fa-gear card-icon text-amber"></i>
+                            <div>
+                                <h2>Xác Thực & Cài Đặt Hệ Thống</h2>
+                                <p>Cấu hình Discord User Token, Auto-Detect Token, Webhook Alerts và Âm Lượng</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-key"></i> Discord User Authorization Token</label>
+                        <div class="input-with-btn">
+                            <input type="password" id="user_token" placeholder="Dán User Token hoặc bấm Auto-Detect..." autocomplete="off">
+                            <button class="btn btn-secondary" id="btnToggleTokenVisibility">
+                                <i class="fa-solid fa-eye" id="tokenEyeIcon"></i>
+                            </button>
+                            <button class="btn btn-purple" id="btnAutoDetectToken">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Detect Token
+                            </button>
+                            <button class="btn btn-cyan" id="btnValidateToken">
+                                <i class="fa-solid fa-circle-check"></i> Kiểm Tra
+                            </button>
+                        </div>
+                        <p class="field-hint"><i class="fa-solid fa-circle-info"></i> Bấm <strong>Auto-Detect Token</strong> để tự động quét Token từ ứng dụng Discord/Trình duyệt trên máy bạn.</p>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <!-- Discord Webhook Section -->
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-bell text-emerald"></i> Discord Webhook URL (Gửi Báo Về Discord)</label>
+                        <div class="input-with-btn">
+                            <input type="text" id="webhook_url" placeholder="https://discord.com/api/webhooks/123456789/abcdef..." autocomplete="off">
+                            <button class="btn btn-emerald" id="btnTestWebhook">
+                                <i class="fa-solid fa-paper-plane"></i> Test Webhook
+                            </button>
+                        </div>
+                        <p class="field-hint"><i class="fa-solid fa-circle-info"></i> Tự động gửi thông báo Rich Embed về Discord khi cướp nút Join Queue thành công.</p>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="grid-form">
+                        <div class="form-group span-2 toggle-group">
+                            <div class="toggle-label">
+                                <span class="title"><i class="fa-solid fa-bell"></i> Kích hoạt Webhook Alerts</span>
+                                <span class="desc">Bật/tắt tự động gửi thông báo về Discord Webhook</span>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="setting_webhook_enabled" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group span-2 toggle-group">
+                            <div class="toggle-label">
+                                <span class="title"><i class="fa-solid fa-volume-high"></i> Âm thanh thông báo (Sound Alert)</span>
+                                <span class="desc">Phát tiếng BEEP khi bấm nút thành công hoặc vào queue</span>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="setting_sound_alert" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <!-- Sound Volume Slider -->
+                        <div class="form-group span-2 toggle-group" style="flex-direction: column; align-items: stretch; gap: 10px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div class="toggle-label">
+                                    <span class="title"><i class="fa-solid fa-sliders text-cyan"></i> Âm Lượng Thông Báo (Alert Volume)</span>
+                                    <span class="desc">Điều chỉnh âm lượng phát BEEP khi cướp nút thành công</span>
+                                </div>
+                                <span class="volume-badge" id="volumeValueBadge">80%</span>
+                            </div>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="range" id="setting_sound_volume" min="0" max="100" value="80" class="volume-slider">
+                                <button class="btn btn-sm btn-cyan" id="btnTestSound" style="white-space: nowrap;">
+                                    <i class="fa-solid fa-play"></i> Thử Âm
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group span-2 toggle-group">
+                            <div class="toggle-label">
+                                <span class="title"><i class="fa-solid fa-star"></i> Hiệu ứng Tuyết Rơi & Chòm Sao</span>
+                                <span class="desc">Bật/tắt canvas nền hạt tuyết rơi mượt 60 FPS</span>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="setting_constellation" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="card-footer-bar justify-end">
+                        <button class="btn btn-emerald" id="btnSaveConfig">
+                            <i class="fa-solid fa-floppy-disk"></i> Lưu Cấu Hình (Save Config)
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: LOGS -->
+            <section class="tab-pane" id="pane-logs">
+                <div class="glass-card full-height-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fa-solid fa-terminal card-icon text-indigo"></i>
+                            <div>
+                                <h2>Nhật Ký Hoạt Động (Live Terminal)</h2>
+                                <p>Theo dõi tiến trình kết nối Gateway, phát hiện nút và thời gian phản hồi API</p>
+                            </div>
+                        </div>
+                        <div class="log-controls">
+                            <button class="btn-icon active" data-filter="all">Tất cả</button>
+                            <button class="btn-icon" data-filter="success">Success</button>
+                            <button class="btn-icon" data-filter="warning">Warning</button>
+                            <button class="btn-icon" data-filter="error">Error</button>
+                            <button class="btn btn-sm btn-outline" id="btnClearLogs">
+                                <i class="fa-solid fa-trash"></i> Xóa Logs
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="terminal-body" id="logTerminal">
+                        <div class="log-line system">
+                            <span class="log-time">[SYSTEM]</span>
+                            <span class="log-msg">⚡ Discord Queue Joiner v1.0 initialized. Ready for operations.</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="footer-info">
+                <span><i class="fa-solid fa-shield-cat"></i> MCTIERS, PVPTIERS & CUSTOM SERVERS ENGINE</span>
+            </div>
+            <div class="footer-actions">
+                <button class="btn btn-sm btn-danger" id="btnStopAll">
+                    <i class="fa-solid fa-power-off"></i> DỪNG TẤT CẢ
+                </button>
+            </div>
+        </footer>
+    <!-- HWID Lock Screen Overlay -->
+    <div id="hwidLockOverlay" class="hwid-overlay hidden">
+        <div class="hwid-modal">
+            <div class="hwid-modal-header">
+                <div class="hwid-lock-icon">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h2>XÁC THỰC BẢN QUYỀN HWID</h2>
+                <p class="hwid-subtitle">Mã phần cứng (Hardware ID) của máy chưa được đăng ký bản quyền!</p>
+            </div>
+            <div class="hwid-modal-body">
+                <div class="hwid-box">
+                    <span class="hwid-box-label"><i class="fa-solid fa-microchip"></i> MÃ HWID CỦA MÁY BẠN:</span>
+                    <div class="hwid-key-container">
+                        <input type="text" id="hwidKeyInput" readonly value="ĐANG LẤY MÃ HWID...">
+                        <button class="btn btn-purple" id="btnCopyHwid">
+                            <i class="fa-solid fa-copy"></i> Sao Chép HWID
+                        </button>
+                    </div>
+                </div>
+                <div class="hwid-instructions">
+                    <p><i class="fa-solid fa-triangle-exclamation"></i> Vui lòng copy mã HWID gửi Admin HOẶC nhập mã License Key được cấp để kích hoạt bản quyền.</p>
+                </div>
+                <div class="hwid-divider" style="margin: 14px 0; border-top: 1px solid rgba(255,255,255,0.1); position: relative;">
+                    <span style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #0f142a; padding: 0 10px; font-size: 11px; color: var(--text-muted);">HOẶC KÍCH HOẠT BẰNG KEY</span>
+                </div>
+                <div class="hwid-box">
+                    <span class="hwid-box-label"><i class="fa-solid fa-key text-amber"></i> NHẬP LICENSE KEY BẢN QUYỀN:</span>
+                    <div class="hwid-key-container">
+                        <input type="text" id="licenseKeyInput" placeholder="JOINER-XXXX-XXXX-XXXX" autocomplete="off" style="text-transform: uppercase;">
+                        <button class="btn btn-emerald" id="btnActivateKey">
+                            <i class="fa-solid fa-key"></i> Kích Hoạt
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="hwid-modal-footer">
+                <button class="btn btn-cyan" id="btnRecheckHwid">
+                    <i class="fa-solid fa-rotate"></i> Kiểm Tra Lại Kích Hoạt
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="constellation.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
