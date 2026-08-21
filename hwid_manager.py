@@ -128,7 +128,7 @@ class HWIDManager:
                     url_with_cb,
                     headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 'Accept': 'application/json'}
                 )
-                with urllib.request.urlopen(req, timeout=5) as resp:
+                with urllib.request.urlopen(req, timeout=20) as resp:
                     data = json.loads(resp.read().decode('utf-8'))
                     if isinstance(data, dict) and "content" in data and "encoding" in data:
                         raw_bytes = base64.b64decode(data["content"].encode('utf-8'))
@@ -163,8 +163,8 @@ class HWIDManager:
         hwid_settings = config_mgr.config.get("hwid_settings", {})
         keys_url = hwid_settings.get("keys_url", "").strip() or hwid_settings.get("whitelist_url", "").strip()
 
-        # Try remote activation if URL is configured
-        if keys_url and keys_url.startswith("http"):
+        # Try remote activation if URL is configured and is NOT a static GitHub Raw URL
+        if keys_url and keys_url.startswith("http") and "githubusercontent.com" not in keys_url:
             try:
                 activate_url = keys_url.replace("/api/verify", "/api/activate").replace("/keys.json", "/api/activate")
                 if not activate_url.endswith("/api/activate"):
@@ -176,7 +176,7 @@ class HWIDManager:
                     data=payload,
                     headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'}
                 )
-                with urllib.request.urlopen(req, timeout=5) as resp:
+                with urllib.request.urlopen(req, timeout=20) as resp:
                     res_data = json.loads(resp.read().decode('utf-8'))
                     if res_data.get("success"):
                         config_mgr.config["license_key"] = key_str
@@ -260,7 +260,7 @@ class HWIDManager:
                     whitelist_url,
                     headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
                 )
-                with urllib.request.urlopen(req, timeout=5) as resp:
+                with urllib.request.urlopen(req, timeout=20) as resp:
                     data = json.loads(resp.read().decode('utf-8'))
                     allowed = []
                     if isinstance(data, list):
