@@ -84,19 +84,6 @@ class HWIDManager:
         return formatted
 
     @classmethod
-    def load_keys_data(cls, keys_url=""):
-        if keys_url and keys_url.startswith("http"):
-            try:
-                req = urllib.request.Request(
-                    keys_url,
-                    headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-                )
-                with urllib.request.urlopen(req, timeout=5) as resp:
-                    return json.loads(resp.read().decode('utf-8'))
-            except Exception as e:
-                print(f"[HWID] Error fetching remote keys: {e}")
-
-    @classmethod
     def get_keys_file_paths(cls):
         import sys
         candidate_paths = []
@@ -118,26 +105,40 @@ class HWIDManager:
 
     @classmethod
     def load_keys_data(cls, keys_url=""):
-        if keys_url and keys_url.startswith("http"):
-            try:
-                req = urllib.request.Request(
-                    keys_url,
-                    headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-                )
-                with urllib.request.urlopen(req, timeout=5) as resp:
-                    return json.loads(resp.read().decode('utf-8'))
-            except Exception as e:
-                print(f"[HWID] Error fetching remote keys: {e}")
+        combined_keys = {}
 
-        # Local keys.json file search across candidate paths
+        # 1. Load local keys.json first
         for path in cls.get_keys_file_paths():
             if os.path.exists(path):
                 try:
                     with open(path, "r", encoding="utf-8") as f:
-                        return json.load(f)
+                        ldata = json.load(f)
+                        if isinstance(ldata, dict) and "valid_keys" in ldata:
+                            combined_keys.update(ldata["valid_keys"])
                 except Exception:
                     pass
-        return {"valid_keys": {}}
+
+        # 2. Fetch remote keys if URL is provided
+        if keys_url and keys_url.startswith("http"):
+            try:
+                import time
+                import base64
+                url_with_cb = f"{keys_url}{'&' if '?' in keys_url else '?'}t={int(time.time())}"
+                req = urllib.request.Request(
+                    url_with_cb,
+                    headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 'Accept': 'application/json'}
+                )
+                with urllib.request.urlopen(req, timeout=5) as resp:
+                    data = json.loads(resp.read().decode('utf-8'))
+                    if isinstance(data, dict) and "content" in data and "encoding" in data:
+                        raw_bytes = base64.b64decode(data["content"].encode('utf-8'))
+                        data = json.loads(raw_bytes.decode('utf-8'))
+                    if isinstance(data, dict) and "valid_keys" in data:
+                        combined_keys.update(data["valid_keys"])
+            except Exception as e:
+                print(f"[HWID] Error fetching remote keys: {e}")
+
+        return {"valid_keys": combined_keys}
 
     @classmethod
     def save_keys_data(cls, data):
@@ -159,8 +160,31 @@ class HWIDManager:
         if not key_str:
             return {"success": False, "message": "Vui lòng nhập mã Key!"}
 
-        hwid_settings = config_mgr.config.get("hwid_settings", {})
-        keys_url = hwid_settings.get("whitelist_url", "")
+        keys_url = config_mgr.config.get("hwid_settings", {}).get("whitelist_url", "")
+
+        # Try remote activation if URL is configured
+        if keys_url and keys_url.startswith("http"):
+            try:
+                activate_url = keys_url.replace("/api/verify", "/api/activate").replace("/keys.json", "/api/activate")
+                if not activate_url.endswith("/api/activate"):
+                    activate_url = keys_url
+                
+                payload = json.dumps({"license_key": key_str, "hwid": current_hwid}).encode('utf-8')
+                req = urllib.request.Request(
+                    activate_url,
+                    data=payload,
+                    headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'}
+                )
+                with urllib.request.urlopen(req, timeout=5) as resp:
+                    res_data = json.loads(resp.read().decode('utf-8'))
+                    if res_data.get("success"):
+                        config_mgr.config["license_key"] = key_str
+                        config_mgr.save_config(config_mgr.config)
+                        return res_data
+            except Exception as e:
+                print(f"[HWID] Remote activation failed, falling back to local check: {e}")
+
+        # Local fallback activation logic
         keys_data = cls.load_keys_data(keys_url)
         valid_keys = keys_data.get("valid_keys", {})
 
@@ -177,8 +201,7 @@ class HWIDManager:
         key_info["hwid"] = current_hwid
         key_info["used"] = True
         valid_keys[key_str] = key_info
-        keys_data["valid_keys"] = valid_keys
-        cls.save_keys_data(keys_data)
+        cls.save_keys_data({"valid_keys": valid_keys})
 
         # Save active key to config
         config_mgr.config["license_key"] = key_str
