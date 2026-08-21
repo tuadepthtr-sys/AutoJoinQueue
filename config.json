@@ -1,0 +1,92 @@
+{
+    "user_token": "",
+    "presets": {
+        "crystal": {
+            "name": "McTiers Crystal",
+            "server_id": "898743810207653919",
+            "channel_id": "",
+            "bot_id": "1124128173609713734"
+        },
+        "sw": {
+            "name": "McTiers Sw (Sword)",
+            "server_id": "1317975081976332338",
+            "channel_id": "1317975085470187623",
+            "bot_id": "1124128173609713734"
+        },
+        "smp": {
+            "name": "McTiers Smp",
+            "server_id": "1224245679749206050",
+            "channel_id": "1224245683335462969",
+            "bot_id": "1124128173609713734"
+        },
+        "netherite_pot": {
+            "name": "McTiers Netherite Pot",
+            "server_id": "1317971630886227998",
+            "channel_id": "1317971632484126791",
+            "bot_id": "1124128173609713734"
+        },
+        "dia_pot": {
+            "name": "McTiers Dia Pot",
+            "server_id": "1317974023384334426",
+            "channel_id": "1317974027922309133",
+            "bot_id": "1124128173609713734"
+        },
+        "uhc": {
+            "name": "McTiers UHC",
+            "server_id": "1316948661384646767",
+            "channel_id": "1316948663095791623",
+            "bot_id": "1124128173609713734"
+        },
+        "mace": {
+            "name": "McTiers Mace",
+            "server_id": "1187058381849112606",
+            "channel_id": "1306853800547581963",
+            "bot_id": "1124128173609713734"
+        },
+        "axe_shield": {
+            "name": "McTiers Axe and Shield",
+            "server_id": "1317974470132240424",
+            "channel_id": "1317974473617707094",
+            "bot_id": "1124128173609713734"
+        }
+    },
+    "global_settings": {
+        "sound_alert": true,
+        "auto_reconnect": true,
+        "custom_delay_ms": 50,
+        "theme": "dark_cosmic",
+        "constellation_fps": 60
+    },
+    "mctiers": {
+        "name": "MCTIERS",
+        "enabled": false,
+        "selected_preset": "sw",
+        "server_id": "1317975081976332338",
+        "channel_id": "1317975085470187623",
+        "bot_id": "1124128173609713734",
+        "trigger_start": false,
+        "join_button_labels": [
+            "Join Queue",
+            "Join",
+            "Queue"
+        ],
+        "custom_id_filter": "",
+        "auto_click_speed_ms": 100
+    },
+    "pvptiers": {
+        "name": "PVPTIERS",
+        "enabled": false,
+        "selected_preset": "custom",
+        "server_id": "",
+        "channel_id": "",
+        "bot_id": "1124128173609713734",
+        "trigger_start": false,
+        "join_button_labels": [
+            "Join Queue",
+            "Join",
+            "Queue"
+        ],
+        "custom_id_filter": "",
+        "auto_click_speed_ms": 100
+    }
+}
