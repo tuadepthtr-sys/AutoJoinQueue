@@ -57,6 +57,11 @@
         "theme": "dark_cosmic",
         "constellation_fps": 60
     },
+    "hwid_settings": {
+        "enabled": true,
+        "whitelist_url": "https://autokeyqueue.onrender.com/api/verify",
+        "allowed_hwids": []
+    },
     "mctiers": {
         "name": "MCTIERS",
         "enabled": false,
